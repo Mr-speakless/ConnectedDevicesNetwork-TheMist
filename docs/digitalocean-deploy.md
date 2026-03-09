@@ -14,17 +14,20 @@ Reason:
 - local Vite dev server proxies `/api` to `http://localhost:3001`
 - `Dockerfile` builds the React app and runs the Node server in one container
 - `docker-compose.yml` mounts `./data` into the container so event history persists
-- `deploy/nginx/themist.conf` is ready for reverse proxying a domain to the app
+- `deploy/nginx/themist.conf` is ready for reverse proxying your Droplet IP to the app
 
 ## 1. Prepare the Droplet
 
 Use Ubuntu 24.04 on DigitalOcean.
 
-Install Docker, Compose plugin, and Nginx:
+Install Docker, Compose, and Nginx:
 
 ```bash
 sudo apt update
-sudo apt install -y docker.io docker-compose-plugin nginx
+sudo apt install -y software-properties-common
+sudo add-apt-repository -y universe
+sudo apt update
+sudo apt install -y docker.io docker-compose-v2 nginx
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
 ```
@@ -64,30 +67,42 @@ curl http://127.0.0.1:3001/api/health
 
 ## 4. Configure Nginx
 
-Copy the provided config and replace `your-domain.com` with your real domain:
+Copy the provided config. It is already set up for the no-domain case and will accept requests sent directly to your Droplet IP:
 
 ```bash
 sudo cp deploy/nginx/themist.conf /etc/nginx/sites-available/themist
-sudo nano /etc/nginx/sites-available/themist
 sudo ln -s /etc/nginx/sites-available/themist /etc/nginx/sites-enabled/themist
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-Point your domain's `A` record to the Droplet IP before enabling HTTPS.
-
-## 5. Enable HTTPS
-
-Install Certbot:
+If the default Nginx site is enabled, remove it first:
 
 ```bash
-sudo apt install -y certbot python3-certbot-nginx
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
-Issue the certificate:
+After that, open the site in your browser with:
+
+```text
+http://<your-droplet-public-ip>
+```
+
+## 5. Network check
+
+If the site does not open from your own computer, make sure inbound port `80` is allowed:
 
 ```bash
-sudo certbot --nginx -d your-domain.com
+sudo ufw allow 80/tcp
+sudo ufw status
+```
+
+Also verify that the app is reachable locally on the Droplet:
+
+```bash
+curl http://127.0.0.1:3001/api/health
 ```
 
 ## 6. Deploy updates
@@ -98,6 +113,16 @@ For later updates:
 git pull
 docker compose up -d --build
 ```
+
+## Optional: add a domain later
+
+If you later buy a domain, update `deploy/nginx/themist.conf` like this:
+
+```nginx
+server_name your-domain.com;
+```
+
+Then point the domain's `A` record to the Droplet IP and optionally add HTTPS with Certbot.
 
 ## App Platform note
 
