@@ -3,8 +3,8 @@ import { GlassCard } from '@developer-hub/liquid-glass';
 import styles from './styles.module.css';
 
 const Y_AXIS_MIN = 0;
-const Y_AXIS_MAX = 300;
-const Y_AXIS_STEP = 50;
+const Y_AXIS_MAX = 500;
+const Y_AXIS_STEP = 100;
 const Y_AXIS_VALUES = Array.from(
   { length: (Y_AXIS_MAX - Y_AXIS_MIN) / Y_AXIS_STEP + 1 },
   (_, index) => Y_AXIS_MAX - index * Y_AXIS_STEP,
@@ -211,20 +211,20 @@ export default function AvgCard({ data }) {
                 </div>
               ) : null}
 
-              {data.canGoPrevious ? (
+              {data.canGoNext ? (
                 <button
                   className={`${styles.navButton} ${styles.navLeft}`}
-                  onClick={data.onPrevious}
+                  onClick={data.onNext}
                   type="button"
                 >
                   {'<'}
                 </button>
               ) : null}
 
-              {data.canGoNext ? (
+              {data.canGoPrevious ? (
                 <button
                   className={`${styles.navButton} ${styles.navRight}`}
-                  onClick={data.onNext}
+                  onClick={data.onPrevious}
                   type="button"
                 >
                   {'>'}

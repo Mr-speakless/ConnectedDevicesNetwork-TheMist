@@ -61,15 +61,13 @@
 }
 
 .bottomBar {
+    display: flex;
+    justify-content: center;
     box-sizing: border-box;
     left: 0;
     padding: 20px;
-    pointer-events: none;
     position: fixed;
     bottom: 0;
     width: 100%;
-}
-
-.bottomBar>* {
-    pointer-events: auto;
+    z-index: 20;
 }

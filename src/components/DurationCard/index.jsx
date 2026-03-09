@@ -275,8 +275,8 @@ export default function DurationCard({ data }) {
                 className={styles.marker}
                 style={{ left: `${(marker.x / chartWidth) * 100}%` }}
               >
-                <div className={styles.markerLabel}>{marker.label}</div>
                 <div className={styles.markerLine} />
+                <div className={styles.markerLabel}>{marker.label}</div>
               </div>
             );
           })}
