@@ -11,6 +11,8 @@ lerna-debug.log*
 
 node_modules
 dist-ssr
+data
+.data
 .env
 .env.*
 !.env.example
@@ -31,3 +33,4 @@ AGENTS.md
 ARCHITECTURE.md
 bottom_bar_fix_report.md.resolved
 UpdateServer.md
+
