@@ -1,0 +1,244 @@
+.durationCard {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+}
+
+.durationCard :global(.glass) {
+    width: 100%;
+}
+
+.content {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: var(--card-padding);
+}
+
+.headerBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.latestVoc {
+    color: rgba(255, 255, 255, 0.96);
+    font-family: var(--font-display);
+    font-size: clamp(38px, 4.4vw, 50px);
+    line-height: 1;
+}
+
+.metaRow {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.metaLabel {
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-display);
+    font-size: 16px;
+    line-height: 1.1;
+}
+
+.chartShell {
+    background: rgba(0, 0, 0, 0.46);
+    border-radius: var(--card-radius);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    height: clamp(180px, 23vw, 220px);
+    overflow: hidden;
+    position: relative;
+}
+
+.chart {
+    cursor: crosshair;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.marker {
+    align-items: center;
+    bottom: var(--panel-padding);
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.markerLabel {
+    background: rgba(255, 255, 255, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-display);
+    font-size: 9px;
+    line-height: 1;
+    margin-bottom: 8px;
+    padding: 5px 9px;
+}
+
+.markerLine {
+    border-left: 2px dashed rgba(255, 255, 255, 0.72);
+    height: 102px;
+}
+
+.connectionBadge {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-display);
+    font-size: 9px;
+    line-height: 1;
+    padding: 6px 10px;
+    position: absolute;
+    right: var(--panel-padding);
+    top: var(--panel-padding);
+    z-index: 3;
+}
+
+.connectionBadge[data-online="true"] {
+    background: rgba(133, 214, 110, 0.16);
+    border-color: rgba(133, 214, 110, 0.36);
+}
+
+.connectionBadge[data-pending="true"] {
+    background: rgba(244, 193, 90, 0.16);
+    border-color: rgba(244, 193, 90, 0.36);
+}
+
+.hoverLineSvg {
+    stroke: rgba(255, 255, 255, 0.72);
+    stroke-dasharray: 4 6;
+    stroke-width: 1.5;
+}
+
+.hoverDotSvg {
+    fill: rgba(255, 255, 255, 0.96);
+}
+
+.tooltip {
+    background: rgba(30, 30, 32, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+    min-width: 110px;
+    padding: 8px 10px;
+    pointer-events: none;
+    position: absolute;
+    transform: translate(-50%, 0);
+    z-index: 4;
+}
+
+.tooltipTime {
+    color: rgba(255, 255, 255, 0.72);
+    font-family: var(--font-display);
+    font-size: 9px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.tooltipValue {
+    color: rgba(255, 255, 255, 0.96);
+    font-family: var(--font-display);
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.emptyState {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.72);
+    display: flex;
+    font-family: var(--font-display);
+    font-size: 12px;
+    inset: 0;
+    justify-content: center;
+    padding: var(--panel-padding);
+    position: absolute;
+    text-align: center;
+    z-index: 2;
+}
+
+.timelineControls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timelineSummary,
+.timelineEnds {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.76);
+    display: flex;
+    font-family: var(--font-display);
+    font-size: 10px;
+    justify-content: space-between;
+    line-height: 1.2;
+    min-width: 0;
+}
+
+.timelineSummary span:last-child {
+    color: rgba(255, 255, 255, 0.94);
+    text-align: right;
+}
+
+.timelineSlider {
+    appearance: none;
+    background: transparent;
+    cursor: ew-resize;
+    height: 20px;
+    width: 100%;
+}
+
+.timelineSlider::-webkit-slider-runnable-track {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(244, 193, 90, 0.5), rgba(255, 255, 255, 0.18));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    height: 6px;
+}
+
+.timelineSlider::-webkit-slider-thumb {
+    appearance: none;
+    background: linear-gradient(180deg, rgba(255, 245, 227, 0.98), rgba(236, 189, 94, 0.96));
+    border: 1px solid rgba(93, 72, 22, 0.32);
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+    height: 16px;
+    margin-top: -6px;
+    width: 16px;
+}
+
+.timelineSlider::-moz-range-track {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(244, 193, 90, 0.5), rgba(255, 255, 255, 0.18));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    height: 6px;
+}
+
+.timelineSlider::-moz-range-thumb {
+    background: linear-gradient(180deg, rgba(255, 245, 227, 0.98), rgba(236, 189, 94, 0.96));
+    border: 1px solid rgba(93, 72, 22, 0.32);
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+    height: 16px;
+    width: 16px;
+}
+
+@media (max-width: 720px) {
+    .metaRow {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .timelineSummary,
+    .timelineEnds {
+        font-size: 9px;
+        gap: 8px;
+    }
+}

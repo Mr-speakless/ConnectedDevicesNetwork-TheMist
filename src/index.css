@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+@import "tailwindcss";
+
+:root {
+  --font-display: 'Audiowide', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --type-header-fz: 40px;
+  --type-header-c: rgba(255, 255, 255, 0.75);
+  --type-sec-fz: 30px;
+  --type-sec-c: rgba(255, 255, 255, 0.75);
+  --type-third-fz: 20px;
+  --type-third-c: rgba(255, 255, 255, 0.75);
+  --type-forth-fz: 15px;
+  --type-forth-c: rgba(255, 255, 255, 0.75);
+  --type-third-brown-fz: 20px;
+  --type-third-brown-c: rgba(255, 255, 255, 0.4);
+  --type-header-white-fz: 40px;
+  --type-header-white-c: rgba(255, 255, 255, 0.3);
+  --font-weight-normal: 400;
+  --line-height-normal: normal;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}

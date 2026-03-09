@@ -1,0 +1,75 @@
+.appContainer {
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    width: 100vw;
+}
+
+.backgroundLayer {
+    left: 0;
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+}
+
+.dashboardLayer {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    width: 100%;
+    z-index: 1;
+}
+
+.mainFrame {
+    --dashboard-gap: 20px;
+    --card-padding: 20px;
+    --small-card-gap: 10px;
+    --card-radius: 20px;
+    --panel-radius: 18px;
+    --panel-padding: 14px;
+    --slider-radius: 40px;
+    --small-card-height: 180px;
+    transform: translateY(-32px);
+    width: min(100%, 620px);
+}
+
+.gridContainer {
+    display: grid;
+    gap: var(--dashboard-gap);
+}
+
+.topRow {
+    width: 100%;
+}
+
+.bottomRow {
+    align-items: stretch;
+    display: grid;
+    gap: var(--dashboard-gap);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+}
+
+.topRow > *,
+.bottomRow > div {
+    min-width: 0;
+}
+
+.bottomBar {
+    box-sizing: border-box;
+    left: 0;
+    padding: 20px;
+    pointer-events: none;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.bottomBar>* {
+    pointer-events: auto;
+}

@@ -1,0 +1,11 @@
+.barGlass {
+    width: 100%;
+}
+
+.barGlass :global(.glass) {
+    width: 100%;
+}
+
+.barGlass :global(.glass) > div {
+    width: 100%;
+}
