@@ -275,6 +275,10 @@ Reason:
 
 - this project currently persists runtime state into `data/event-store.json`
 - a Droplet keeps that file on disk across restarts
+- the recommended workflow is:
+  - build `dist/` locally
+  - commit the built `dist/` to git
+  - let the Droplet pull the repo and run `server.js`
 
 If the server restarts:
 

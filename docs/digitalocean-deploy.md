@@ -5,36 +5,70 @@ Recommended target: DigitalOcean Droplet.
 Reason:
 
 - this project stores runtime state in `data/event-store.json`
-- App Platform uses ephemeral filesystem, so JSON persistence will be lost on restart or redeploy
+- this project has both a frontend build output and a Node backend
+- the smallest Droplets can run the app, but they are often too small to build the frontend on the server
 
 ## What is already prepared
 
 - frontend build output is now served by `server.js`
 - frontend API requests default to the same origin in production
 - local Vite dev server proxies `/api` to `http://localhost:3001`
-- `Dockerfile` builds the React app and runs the Node server in one container
-- `docker-compose.yml` mounts `./data` into the container so event history persists
 - `deploy/nginx/themist.conf` is ready for reverse proxying your Droplet IP to the app
 
-## 1. Prepare the Droplet
+## Deployment model
+
+Recommended workflow:
+
+1. Build the frontend locally with `npm run build`
+2. Commit the generated `dist/` to git
+3. Push the repo
+4. On the Droplet, pull the repo
+5. Install production dependencies only
+6. Run `server.js`
+7. Put Nginx in front of it
+
+This avoids running the heavy frontend build on a small Droplet.
+
+## 1. Build and push from your local machine
+
+Build locally first:
+
+```bash
+wsl bash -lc "source /home/wsy3699/.nvm/nvm.sh && nvm use 24.14.0 >/dev/null && npm run build"
+```
+
+Then commit both source code and the generated `dist/` folder:
+
+```bash
+git add .
+git commit -m "feat: prepare droplet deployment"
+git push
+```
+
+## 2. Prepare the Droplet
 
 Use Ubuntu 24.04 on DigitalOcean.
 
-Install Docker, Compose, and Nginx:
+Install Node.js and Nginx:
 
 ```bash
 sudo apt update
 sudo apt install -y software-properties-common
 sudo add-apt-repository -y universe
 sudo apt update
-sudo apt install -y docker.io docker-compose-v2 nginx
-sudo systemctl enable --now docker
-sudo usermod -aG docker $USER
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+sudo apt install -y nodejs nginx
+sudo systemctl enable --now nginx
 ```
 
-Reconnect to the server after changing the Docker group.
+Check versions:
 
-## 2. Upload the project
+```bash
+node -v
+npm -v
+```
+
+## 3. Pull the project on the Droplet
 
 Clone the repository on the Droplet:
 
@@ -51,12 +85,19 @@ cp .env.example .env
 
 Then edit `.env` and set the real MQTT values if you do not want to rely on the defaults.
 
-## 3. Start the app
-
-Build and run the container:
+Install production dependencies only:
 
 ```bash
-docker compose up -d --build
+npm ci --omit=dev
+mkdir -p data
+```
+
+## 4. Start the app
+
+Run the app directly:
+
+```bash
+PORT=3001 npm run start
 ```
 
 Check that the API is healthy:
@@ -65,7 +106,18 @@ Check that the API is healthy:
 curl http://127.0.0.1:3001/api/health
 ```
 
-## 4. Configure Nginx
+For a long-running process, use `pm2` or `systemd`.
+
+Recommended `pm2` setup:
+
+```bash
+sudo npm install -g pm2
+pm2 start npm --name themist -- run start
+pm2 save
+pm2 startup systemd
+```
+
+## 5. Configure Nginx
 
 Copy the provided config. It is already set up for the no-domain case and will accept requests sent directly to your Droplet IP:
 
@@ -90,7 +142,7 @@ After that, open the site in your browser with:
 http://<your-droplet-public-ip>
 ```
 
-## 5. Network check
+## 6. Network check
 
 If the site does not open from your own computer, make sure inbound port `80` is allowed:
 
@@ -105,13 +157,21 @@ Also verify that the app is reachable locally on the Droplet:
 curl http://127.0.0.1:3001/api/health
 ```
 
-## 6. Deploy updates
+## 7. Deploy updates
 
 For later updates:
 
 ```bash
 git pull
-docker compose up -d --build
+npm ci --omit=dev
+```
+
+If the frontend changed, rebuild it locally first and push the updated `dist/`.
+
+After pulling new code, restart the app:
+
+```bash
+pm2 restart themist
 ```
 
 ## Optional: add a domain later
@@ -123,7 +183,3 @@ server_name your-domain.com;
 ```
 
 Then point the domain's `A` record to the Droplet IP and optionally add HTTPS with Certbot.
-
-## App Platform note
-
-If you still want App Platform, this repo can run there with the included `Dockerfile`, but `data/event-store.json` will not be durable. Use that only if losing historical local state is acceptable or if you first move persistence to a managed database or external storage.
