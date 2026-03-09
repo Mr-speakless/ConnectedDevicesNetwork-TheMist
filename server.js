@@ -1,5 +1,7 @@
+import fs from 'node:fs';
 import http from 'node:http';
-import { URL } from 'node:url';
+import path from 'node:path';
+import { fileURLToPath, URL } from 'node:url';
 import mqtt from 'mqtt';
 import {
   createEventDetector,
@@ -28,6 +30,10 @@ const PORT = Number(process.env.PORT || 3001);
 const DEFAULT_CHART_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_BUFFER_SIZE = 100000;
 const DEFAULT_MAX_CHART_POINTS = 1440;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DIST_DIR = path.resolve(__dirname, 'dist');
+const DIST_INDEX_PATH = path.join(DIST_DIR, 'index.html');
 const WINDOW_MS = Number(process.env.CHART_WINDOW_MS || DEFAULT_CHART_WINDOW_MS);
 const MAX_BUFFER_SIZE = Number(process.env.MAX_BUFFER_SIZE || DEFAULT_MAX_BUFFER_SIZE);
 const MAX_CHART_POINTS = Number(process.env.MAX_CHART_POINTS || DEFAULT_MAX_CHART_POINTS);
@@ -41,6 +47,20 @@ const CLEAN_CONFIG = {
   ...getCleanConfigFromEnv(process.env),
 };
 const EVENT_STORE_PATH = getEventStorePath(process.env);
+const STATIC_CONTENT_TYPES = {
+  '.css': 'text/css; charset=utf-8',
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.txt': 'text/plain; charset=utf-8',
+  '.map': 'application/json; charset=utf-8',
+};
 
 function sanitizePersistedReading(reading) {
   if (!reading || typeof reading !== 'object') {
@@ -119,6 +139,67 @@ function sendJson(response, statusCode, payload) {
   setCorsHeaders(response);
   response.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
   response.end(JSON.stringify(payload));
+}
+
+function getContentType(filepath) {
+  return STATIC_CONTENT_TYPES[path.extname(filepath).toLowerCase()] || 'application/octet-stream';
+}
+
+function sendFile(response, filepath, method = 'GET') {
+  response.writeHead(200, { 'Content-Type': getContentType(filepath) });
+
+  if (method === 'HEAD') {
+    response.end();
+    return;
+  }
+
+  const stream = fs.createReadStream(filepath);
+  stream.on('error', (error) => {
+    console.error(`Failed to read static file ${filepath}:`, error.message);
+    if (!response.headersSent) {
+      sendJson(response, 500, { error: 'Failed to load app asset' });
+      return;
+    }
+
+    response.destroy(error);
+  });
+  stream.pipe(response);
+}
+
+function resolveStaticPath(requestPathname) {
+  const pathname = decodeURIComponent(requestPathname);
+  const relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
+  const resolvedPath = path.resolve(DIST_DIR, relativePath);
+  const pathFromDist = path.relative(DIST_DIR, resolvedPath);
+
+  if (pathFromDist.startsWith('..') || path.isAbsolute(pathFromDist)) {
+    return null;
+  }
+
+  return resolvedPath;
+}
+
+function tryServeStaticAsset(requestPathname, response, method) {
+  if (!fs.existsSync(DIST_DIR)) {
+    return false;
+  }
+
+  const filepath = resolveStaticPath(requestPathname);
+  if (!filepath || !fs.existsSync(filepath) || fs.statSync(filepath).isDirectory()) {
+    return false;
+  }
+
+  sendFile(response, filepath, method);
+  return true;
+}
+
+function tryServeFrontendApp(response, method) {
+  if (!fs.existsSync(DIST_INDEX_PATH)) {
+    return false;
+  }
+
+  sendFile(response, DIST_INDEX_PATH, method);
+  return true;
 }
 
 function pruneReadings() {
@@ -473,6 +554,16 @@ const server = http.createServer((request, response) => {
       eventSummary: eventDetector.getSummary(),
     });
     return;
+  }
+
+  if ((request.method === 'GET' || request.method === 'HEAD') && !requestUrl.pathname.startsWith('/api/')) {
+    if (tryServeStaticAsset(requestUrl.pathname, response, request.method)) {
+      return;
+    }
+
+    if (tryServeFrontendApp(response, request.method)) {
+      return;
+    }
   }
 
   sendJson(response, 404, { error: 'Not found' });

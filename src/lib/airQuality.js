@@ -1,5 +1,3 @@
-const DEFAULT_API_BASE_URL = 'http://localhost:3001';
-
 export const FALLBACK_DASHBOARD_DATA = {
   connected: false,
   lastMessageAt: null,
@@ -30,7 +28,13 @@ export const FALLBACK_EVENTS_DATA = {
 };
 
 function getApiBaseUrl() {
-  return import.meta.env.VITE_AIR_API_BASE_URL || DEFAULT_API_BASE_URL;
+  const configuredBaseUrl = import.meta.env.VITE_AIR_API_BASE_URL?.trim();
+
+  if (!configuredBaseUrl) {
+    return '';
+  }
+
+  return configuredBaseUrl.replace(/\/+$/, '');
 }
 
 function formatClockLabel(timestamp) {

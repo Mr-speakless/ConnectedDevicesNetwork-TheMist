@@ -263,6 +263,19 @@ Stored state includes:
 - `activeFragment`
 - clean state
 
+## Deployment
+
+For DigitalOcean deployment, use the guide in `docs/digitalocean-deploy.md`.
+
+Recommended target:
+
+- DigitalOcean Droplet
+
+Reason:
+
+- this project currently persists runtime state into `data/event-store.json`
+- a Droplet keeps that file on disk across restarts
+
 If the server restarts:
 
 - pending session state can be restored
